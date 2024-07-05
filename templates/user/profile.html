@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}个人中心{% endblock %}
+
+{% block content %}
+<form method="post">
+    <label for="username">用户名：</label>
+    <input type="text" id="username" name="password" value="{{ current_user.username }}" disabled>
+    <br>
+    <label for="nickname">昵称：</label>
+    <input type="text" id="nickname" name="nickname" value="{{ current_user.nickname }}" disabled>
+    <br>
+    <label for="email">邮箱：</label>
+    <input type="email" id="email" name="email" value="{{ current_user.email }}" disabled>
+</form>
+{% endblock %}

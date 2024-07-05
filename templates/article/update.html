@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}修改文章{% endblock %}
+
+{% block content %}
+<form method="post">
+    <label for="title">标题：</label>
+    <br>
+    <input type="text" name="title" id="title" placeholder="请输入文章标题"
+    value="{{ request.form.title or article.title }}">
+    <label for="content">正文：</label>
+    <br>
+    <textarea name="content" id="content" cols="30" rows="10" placeholder="请输入文章正文">
+        {{ request.form.content or article.content }}
+    </textarea>
+    <br>
+    <button type="submit">提交</button>
+</form>
+{% endblock %}

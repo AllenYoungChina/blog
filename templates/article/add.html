@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}新增文章{% endblock %}
+
+{% block content %}
+<form method="post">
+    <label for="title">标题：</label>
+    <br>
+    <input type="text" name="title" id="title" placeholder="请输入文章标题" required>
+    <br>
+    <label for="content">正文：</label>
+    <br>
+    <textarea name="content" id="content" cols="30" rows="10" placeholder="请输入文章正文"></textarea>
+    <br>
+    <button type="submit">提交</button>
+</form>
+{% endblock %}

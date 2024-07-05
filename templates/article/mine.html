@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}我的文章{% endblock %}
+
+{% block content %}
+<h2>我的文章</h2>
+{% for article in article_list %}
+<ul>
+    <li>
+        <a href="{{ url_for('article.detail', article_id=article.id) }}">
+            {{ article.title }}
+        </a>
+        <a href="{{ url_for('article.update', article_id=article.id) }}"
+           style="text-decoration: none">
+            <button>修改</button>
+        </a>
+        <form action="{{ url_for('article.delete', article_id=article.id) }}"
+              method="post" style="display: inline-block">
+            <button type="submit">删除</button>
+        </form>
+    </li>
+</ul>
+{% endfor %}
+{% endblock %}

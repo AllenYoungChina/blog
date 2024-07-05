@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+<h2>文章列表</h2>
+{% for article in article_list %}
+<ul>
+    <li>
+        <a href="{{ url_for('article.detail', article_id=article.id) }}">
+            {{ article.title }}
+        </a>
+    </li>
+</ul>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.title | truncate(8) }}{% endblock %}
+
+{% block content %}
+<div class="article-title">
+    <h2>{{ article.title }}</h2>
+</div>
+<div class="article-content">
+    <textarea name="" id="" cols="30" rows="10">
+        {{ article.content }}
+    </textarea>
+</div>
+{% if current_user and article.user_id == current_user.id %}
+<div class="article-action">
+    <a href="{{ url_for('article.update', article_id=article.id) }}"
+       style="text-decoration: none">
+        <button>修改</button>
+    </a>
+    <form action="{{ url_for('article.delete', article_id=article.id) }}" method="post"
+          style="display: inline-block">
+        <button type="submit">删除</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
