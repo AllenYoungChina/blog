@@ -97,15 +97,4 @@ def delete(article_id):
     article = get_article(article_id)
     db.session.delete(article)
     db.session.commit()
-    return redirect(url_for('article.mine'))
-
-
-@article_bp.route('/mine')
-@login_required
-def mine():
-    """我的文章"""
-    article_list = db.session.execute(
-        db.select(Article).filter(Article.user_id == current_user.id)
-        .order_by(Article.created_at.desc())
-    ).scalars()
-    return render_template('article/mine.html', article_list=article_list)
+    return redirect(url_for('article.index'))
