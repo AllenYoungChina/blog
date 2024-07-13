@@ -3,17 +3,63 @@
 {% block title %}修改文章{% endblock %}
 
 {% block content %}
-<form method="post">
-    <label for="title">标题：</label>
-    <br>
-    <input type="text" name="title" id="title" placeholder="请输入文章标题"
-    value="{{ request.form.title or article.title }}">
-    <label for="content">正文：</label>
-    <br>
-    <textarea name="content" id="content" cols="30" rows="10" placeholder="请输入文章正文">
-        {{ request.form.content or article.content }}
-    </textarea>
-    <br>
-    <button type="submit">提交</button>
-</form>
+<div class="container">
+    <h2 class="mt-4">新增文章</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="title" class="form-label">标题：</label>
+                    <input type="text" class="form-control" id="title" placeholder="请输入文章标题" name="title"
+                           value="{{ request.form.title or article.title }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="content" class="form-label">正文：</label>
+                    <textarea class="form-control" id="content" rows="28"
+                              name="content">{{ request.form.content or article.content }}</textarea>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#previewModal"
+                            onclick="toMarkdown()">
+                        预览
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 预览模态框Modal -->
+        <div class="modal fade modal-lg" id="previewModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">预览：</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="markdownContent"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+<script>
+    function toMarkdown() {
+        let raw = document.getElementById('content').value;
+        let converter = new showdown.Converter();
+        let container = document.getElementById('markdownContent');
+        container.innerHTML = converter.makeHtml(raw)
+    }
+
+    toMarkdown();
+</script>
 {% endblock %}

@@ -56,7 +56,7 @@ def add():
         article = Article(title=title, content=content, user_id=current_user.id)
         db.session.add(article)
         db.session.commit()
-        return redirect(url_for('article.mine'))
+        return redirect(url_for('article.index'))
 
     if error:
         flash(error)

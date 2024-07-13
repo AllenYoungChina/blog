@@ -3,24 +3,35 @@
 {% block title %}{{ article.title | truncate(8) }}{% endblock %}
 
 {% block content %}
-<div class="article-title">
-    <h2>{{ article.title }}</h2>
+<div class="container">
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <h2>{{ article.title }}</h2>
+            <textarea id="content" class="d-none">{{ article.content }}</textarea>
+            <div id="markdownContent"></div>
+            {% if current_user and article.user_id == current_user.id %}
+            <div>
+                <a href="{{ url_for('article.update', article_id=article.id) }}" class="btn btn-primary">
+                    修改
+                </a>
+                <form action="{{ url_for('article.delete', article_id=article.id) }}" method="post"
+                      style="display: inline-block">
+                    <button type="submit" class="btn btn-danger">删除</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-<div class="article-content">
-    <textarea name="" id="" cols="30" rows="10">
-        {{ article.content }}
-    </textarea>
-</div>
-{% if current_user and article.user_id == current_user.id %}
-<div class="article-action">
-    <a href="{{ url_for('article.update', article_id=article.id) }}"
-       style="text-decoration: none">
-        <button>修改</button>
-    </a>
-    <form action="{{ url_for('article.delete', article_id=article.id) }}" method="post"
-          style="display: inline-block">
-        <button type="submit">删除</button>
-    </form>
-</div>
-{% endif %}
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+<script>
+    let converter = new showdown.Converter();
+    let raw = document.getElementById('content').value.trim();
+    console.log(raw)
+    let container = document.getElementById('markdownContent');
+    container.innerHTML = converter.makeHtml(raw);
+</script>
 {% endblock %}

@@ -22,7 +22,7 @@ load_dotenv()
 
 def create_app():
     """工厂函数"""
-    app = Flask(__name__, template_folder='../templates')
+    app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
     app.config['DEBUG'] = os.environ.get('DEBUG')
     app.config['TESTING'] = os.environ.get('TESTING')
