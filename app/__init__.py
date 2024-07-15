@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -28,6 +29,7 @@ def create_app():
     app.config['TESTING'] = os.environ.get('TESTING')
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    app.config['UPLOAD_FOLDER'] = '../upload'
 
     # 注册Flask-SQLAlchemy
     db.init_app(app)
@@ -68,3 +70,12 @@ def init_bp(app):
 
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(article_bp, url_prefix='/article')
+
+
+# 项目根路径
+ROOT_PATH = Path(__file__).parent.parent
+# 图片上传路径
+IMAGE_ROOT = os.path.join(ROOT_PATH, 'upload')
+
+if not os.path.exists(IMAGE_ROOT):
+    os.makedirs(IMAGE_ROOT)

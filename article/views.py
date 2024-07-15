@@ -1,11 +1,14 @@
+import os.path
+import uuid
+
 from flask import (
-    Blueprint, request, abort, render_template, redirect, url_for, flash
+    Blueprint, request, abort, render_template, redirect, url_for, flash, send_from_directory, current_app
 )
 from http import HTTPStatus
 from flask_login import login_required, current_user
 
-from app import db
-from .models import Article
+from app import db, IMAGE_ROOT
+from article.models import Article
 
 article_bp = Blueprint('article', __name__, url_prefix='article')
 
@@ -98,3 +101,37 @@ def delete(article_id):
     db.session.delete(article)
     db.session.commit()
     return redirect(url_for('article.index'))
+
+
+@article_bp.route('/upload', methods=('GET', 'POST'))
+@login_required
+def upload():
+    """图片上传接口"""
+    error = ''
+    filename = ''
+    if request.method == 'POST':
+        print(request.files)
+        if 'file' in request.files:
+            file = request.files['file']
+            suffix = file.filename.rsplit('.', 1)[1].lower()
+            if suffix in ['jpg', 'jpeg', 'png']:
+                filename = str(uuid.uuid4()) + '.' + suffix
+                file_path = os.path.join(IMAGE_ROOT, filename)
+                file.save(file_path)
+            else:
+                error = '图片格式错误'
+        else:
+            error = '未选择图片'
+
+    if error:
+        flash(error)
+
+    return render_template(
+        'article/upload.html', file_name=url_for('article.uploaded_file', filename=filename)
+    )
+
+
+@article_bp.route('/upload/<filename>', methods=('GET', 'POST'))
+def uploaded_file(filename):
+    """图片获取接口"""
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
