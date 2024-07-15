@@ -2,11 +2,15 @@
 
 {% block title %}修改文章{% endblock %}
 
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='toast-ui-editor-3.2.2/css/toastui-editor.min.css') }}"/>
+{% endblock %}
+
 {% block content %}
 <div class="container">
-    <h2 class="mt-4">新增文章</h2>
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10">
+            <h2>修改文章</h2>
             <form method="post">
                 <div class="mb-3">
                     <label for="title" class="form-label">标题：</label>
@@ -14,52 +18,69 @@
                            value="{{ request.form.title or article.title }}" required>
                 </div>
                 <div class="mb-3">
-                    <label for="content" class="form-label">正文：</label>
-                    <textarea class="form-control" id="content" rows="28"
-                              name="content">{{ request.form.content or article.content }}</textarea>
+                    <label for="editor" class="form-label">正文：</label>
+                    <!-- 用于存放从后端获取到的文章正文 -->
+                    <textarea id="content" class="d-none">{{ request.form.content or article.content }}</textarea>
+
+                    <!-- 用于生成Markdown编辑器的容器 -->
+                    <div id="editor"></div>
                 </div>
                 <div>
-                    <button type="submit" class="btn btn-primary">保存</button>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#previewModal"
-                            onclick="toMarkdown()">
-                        预览
-                    </button>
+                    <button type="button" class="btn btn-primary" onclick="update()">保存</button>
                 </div>
             </form>
-        </div>
-
-        <!-- 预览模态框Modal -->
-        <div class="modal fade modal-lg" id="previewModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">预览：</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="markdownContent"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+<script src="{{ url_for('static', filename='toast-ui-editor-3.2.2/js/toastui-editor-all.min.js') }}"></script>
 <script>
-    function toMarkdown() {
-        let raw = document.getElementById('content').value;
-        let converter = new showdown.Converter();
-        let container = document.getElementById('markdownContent');
-        container.innerHTML = converter.makeHtml(raw)
-    }
+    // 获取修改前的文章正文
+    let content = document.getElementById('content').value
 
-    toMarkdown();
+    // 初始化toastui的Markdown编辑器
+    const editor = new toastui.Editor({
+        el: document.querySelector('#editor'),
+        previewStyle: 'vertical',
+        height: '500px',
+        initialValue: content
+    });
+
+
+    // 使用fetch API发送POST请求
+    function update() {
+        const formData = new FormData();
+
+        // 向FormData对象添加数据
+        let content = editor.getMarkdown()  // 从toastui的editor中获取Markdown内容
+        let title = document.getElementById('title').value
+        formData.append('title', title);
+        formData.append('content', content);
+
+        // console.log(title)
+        // console.log(content)
+
+        // 向后端发送post请求新增数据
+        fetch('{{ url_for("article.update", article_id=article.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                // 处理响应
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                // console.log(response)
+                window.location.href = '{{ url_for("article.detail", article_id=article.id) }}';
+            })
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
 </script>
 {% endblock %}

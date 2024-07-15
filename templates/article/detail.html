@@ -2,13 +2,21 @@
 
 {% block title %}{{ article.title | truncate(8) }}{% endblock %}
 
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='toast-ui-editor-3.2.2/css/toastui-editor.min.css') }}"/>
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <div class="row justify-content-center mt-4">
         <div class="col-lg-8">
             <h2>{{ article.title }}</h2>
             <textarea id="content" class="d-none">{{ article.content }}</textarea>
-            <div id="markdownContent"></div>
+
+            <!-- 用于展示渲染后的Markdown文本 -->
+            <div id="viewer"></div>
+
+            <!-- 仅适用于该文章作者的操作 -->
             {% if current_user and article.user_id == current_user.id %}
             <div>
                 <a href="{{ url_for('article.update', article_id=article.id) }}" class="btn btn-primary">
@@ -26,12 +34,14 @@
 {% endblock %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+<script src="{{ url_for('static', filename='toast-ui-editor-3.2.2/js/toastui-editor-all.min.js') }}"></script>
 <script>
-    let converter = new showdown.Converter();
-    let raw = document.getElementById('content').value.trim();
-    console.log(raw)
-    let container = document.getElementById('markdownContent');
-    container.innerHTML = converter.makeHtml(raw);
+    let content = document.getElementById('content').value
+    console.log(content)
+    const viewer = toastui.Editor.factory({
+        el: document.querySelector('#viewer'),
+        viewer: true,
+        initialValue: content
+    });
 </script>
 {% endblock %}
