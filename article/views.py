@@ -10,7 +10,12 @@ from flask_login import login_required, current_user
 from app import db, IMAGE_ROOT
 from article.models import Article
 
+from utils.tools import compress_image
+
 article_bp = Blueprint('article', __name__, url_prefix='article')
+
+MAX_IMAGE_SIZE = 3 * 1024 * 1024  # 图片大小最大为3MB
+IMAGE_COMPRESS_THRESHOLD = 1 * 1024 * 1024  # 图片大小超过1MB时对图片进行压缩
 
 
 def get_article(article_id, check_auth=True):
@@ -97,6 +102,7 @@ def update(article_id):
 @login_required
 def delete(article_id):
     """删除文章"""
+    # TODO: 待删除相关图片
     article = get_article(article_id)
     db.session.delete(article)
     db.session.commit()
@@ -110,24 +116,36 @@ def upload():
     error = ''
     filename = ''
     if request.method == 'POST':
-        print(request.files)
-        if 'file' in request.files:
-            file = request.files['file']
-            suffix = file.filename.rsplit('.', 1)[1].lower()
-            if suffix in ['jpg', 'jpeg', 'png']:
-                filename = str(uuid.uuid4()) + '.' + suffix
-                file_path = os.path.join(IMAGE_ROOT, filename)
-                file.save(file_path)
-            else:
-                error = '图片格式错误'
-        else:
+        if 'file' not in request.files or not request.files['file'].filename:
             error = '未选择图片'
+        else:
+            file = request.files['file']
+
+            # 验证实际文件大小，注意这会消耗文件流
+            file.seek(0, os.SEEK_END)
+            file_size = file.tell()
+            file.seek(0)  # 重置文件指针
+
+            if file_size > MAX_IMAGE_SIZE:
+                error = '图片过大'
+            else:
+                suffix = file.filename.rsplit('.', 1)[1].lower()
+                if suffix in ['jpg', 'jpeg', 'png']:
+                    filename = str(uuid.uuid4()) + '.' + suffix
+                    file_path = os.path.join(IMAGE_ROOT, filename)
+                    file.save(file_path)
+
+                    # 压缩图片
+                    if file_size > IMAGE_COMPRESS_THRESHOLD:
+                        compress_image(file_path)
+                else:
+                    error = '图片格式错误'
 
     if error:
         flash(error)
 
     return render_template(
-        'article/upload.html', file_name=url_for('article.uploaded_file', filename=filename)
+        'article/upload.html', filename=url_for('article.uploaded_file', filename=filename)
     )
 
 
