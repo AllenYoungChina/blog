@@ -58,13 +58,13 @@ def add():
         title = request.form['title']
         content = request.form['content']
         if not title:
-            print(title)
             error = '请输入文章标题'
 
-        article = Article(title=title, content=content, user_id=current_user.id)
-        db.session.add(article)
-        db.session.commit()
-        return redirect(url_for('article.index'))
+        if not error:
+            article = Article(title=title, content=content, user_id=current_user.id)
+            db.session.add(article)
+            db.session.commit()
+            return redirect(url_for('article.index'))
 
     if error:
         flash(error)
